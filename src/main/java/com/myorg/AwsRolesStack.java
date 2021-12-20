@@ -13,12 +13,16 @@ import static java.util.Arrays.asList;
 import static software.amazon.awscdk.services.iam.Effect.*;
 
 public class AwsRolesStack extends Stack {
+
     public AwsRolesStack(final Construct scope, final String id) {
         this(scope, id, null);
     }
 
     public AwsRolesStack(final Construct scope, final String id, final StackProps props) {
         super(scope, id, props);
+
+        final String LAKE_FORMATION_WORKFLOW_ROLE = "LakeFormationWorkflowRole";
+
         final Role ssmManagedInstanceRole = Role.Builder
                 .create(this, "ssmManagedInstanceRole")
                 .roleName("SSMManagedInstanceRole")
@@ -45,7 +49,9 @@ public class AwsRolesStack extends Stack {
                                 .create()
                                 .effect(ALLOW)
                                 .actions(asList("iam:PassRole"))
-                                .resources(asList("arn:aws:iam::563361968771:role/LakeFormationWorkflowRole"))
+                                .resources(asList("arn:aws:iam::"
+                                        + this.getAccount()
+                                        + ":role/" + LAKE_FORMATION_WORKFLOW_ROLE))
                                 .build()))
                 .build();
         final Map<String, PolicyDocument> lakeFormationWorkflowPolicyDocuments = new HashMap<>();
@@ -53,14 +59,14 @@ public class AwsRolesStack extends Stack {
                 lakeFormationWorkflowPolicyDocument);
         final Role lakeFormationWorkflowRole = Role.Builder
                 .create(this, "lakeFormationWorkflowRole")
-                .roleName("LakeFormationWorkflowRole2")
+                .roleName(LAKE_FORMATION_WORKFLOW_ROLE)
                 .assumedBy(new ServicePrincipal("glue.amazonaws.com"))
                 .managedPolicies(asList(ManagedPolicy.fromAwsManagedPolicyName("service-role/AWSGlueServiceRole")))
                 .inlinePolicies(lakeFormationWorkflowPolicyDocuments)
                 .build();
         CfnOutput.Builder
                 .create(this, "lakeFormationWorkflowRoleArn")
-                .exportName("LakeFormationWorkflowRoleArn")
+                .exportName(LAKE_FORMATION_WORKFLOW_ROLE + "Arn")
                 .value(lakeFormationWorkflowRole.getRoleArn())
                 .build();
     }
