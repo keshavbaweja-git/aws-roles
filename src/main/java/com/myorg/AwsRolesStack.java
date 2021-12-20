@@ -3,14 +3,19 @@ package com.myorg;
 import software.amazon.awscdk.CfnOutput;
 import software.amazon.awscdk.Stack;
 import software.amazon.awscdk.StackProps;
-import software.amazon.awscdk.services.iam.*;
+import software.amazon.awscdk.services.iam.CfnInstanceProfile;
+import software.amazon.awscdk.services.iam.ManagedPolicy;
+import software.amazon.awscdk.services.iam.PolicyDocument;
+import software.amazon.awscdk.services.iam.PolicyStatement;
+import software.amazon.awscdk.services.iam.Role;
+import software.amazon.awscdk.services.iam.ServicePrincipal;
 import software.constructs.Construct;
 
 import java.util.HashMap;
 import java.util.Map;
 
 import static java.util.Arrays.asList;
-import static software.amazon.awscdk.services.iam.Effect.*;
+import static software.amazon.awscdk.services.iam.Effect.ALLOW;
 
 public class AwsRolesStack extends Stack {
 
@@ -46,6 +51,7 @@ public class AwsRolesStack extends Stack {
                 .exportName("SsmManagedInstanceProfileArn")
                 .value(cfnInstanceProfile.getAttrArn())
                 .build();
+
         final PolicyDocument lakeFormationWorkflowPolicyDocument = PolicyDocument.Builder
                 .create()
                 .statements(asList(PolicyStatement
